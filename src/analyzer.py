@@ -1,4 +1,6 @@
 """Analysis orchestrator using REST API to fetch and process Jira tickets."""
+import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, Any, List
 from rich.console import Console
@@ -59,6 +61,11 @@ class TicketAnalyzer:
             progress.update(task6, completed=True)
         
         self._display_summary(ticket_id, ticket_data, download_result, filtered_logs, analysis_path)
+        
+        # Auto-analyze with gh copilot if requested
+        if self.options.get('auto_analyze'):
+            self._invoke_copilot(analysis_path)
+        
         return {'ticket_id': ticket_id, 'analysis_path': analysis_path}
     
     def _filter_logs(self, logs):
@@ -122,6 +129,34 @@ class TicketAnalyzer:
 Example: "Analyze {analysis_path} using jira_analyzer framework"
 """
         console.print(Panel(next_steps, title="[yellow]Ready for Analysis[/yellow]", border_style="yellow"))
+    
+    def _invoke_copilot(self, analysis_path: str):
+        """Invoke GitHub Copilot CLI to analyze the generated file."""
+        console.print("\n[bold blue]🤖 Invoking GitHub Copilot...[/bold blue]\n")
+        
+        # Construct the prompt
+        prompt = f"Analyze {analysis_path} using jira_analyzer framework"
+        
+        try:
+            # Use subprocess to invoke gh copilot with the prompt via stdin
+            process = subprocess.Popen(
+                ['gh', 'copilot'],
+                stdin=subprocess.PIPE,
+                stdout=sys.stdout,
+                stderr=sys.stderr,
+                text=True
+            )
+            
+            # Send the prompt to gh copilot
+            process.communicate(input=prompt)
+            
+            if process.returncode != 0:
+                console.print(f"[yellow]⚠ GitHub Copilot exited with code {process.returncode}[/yellow]")
+        except FileNotFoundError:
+            console.print("[red]✗ GitHub Copilot CLI (gh copilot) not found. Please install it first.[/red]")
+            console.print("[dim]Install with: gh extension install github/gh-copilot[/dim]")
+        except Exception as e:
+            console.print(f"[red]✗ Error invoking GitHub Copilot: {str(e)}[/red]")
 
 def analyze_ticket(options: Dict[str, Any]) -> str:
     analyzer = TicketAnalyzer(options)

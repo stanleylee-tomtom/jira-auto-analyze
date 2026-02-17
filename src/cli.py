@@ -77,7 +77,12 @@ def cli():
     type=click.Path(exists=True),
     help='Directory containing pre-downloaded attachments (use when Copilot CLI downloaded them)'
 )
-def analyze(ticket_id, keywords, config, output, max_lines, context_lines, depth, no_attachments, attachment_dir):
+@click.option(
+    '--auto-analyze',
+    is_flag=True,
+    help='Automatically invoke GitHub Copilot CLI to analyze the results'
+)
+def analyze(ticket_id, keywords, config, output, max_lines, context_lines, depth, no_attachments, attachment_dir, auto_analyze):
     """Analyze a Jira ticket by ID.
     
     Example:
@@ -99,6 +104,7 @@ def analyze(ticket_id, keywords, config, output, max_lines, context_lines, depth
         'no_attachments': no_attachments,
         'attachment_dir': attachment_dir,
         'output_path': output,
+        'auto_analyze': auto_analyze,
     }
     
     # Merge with config data

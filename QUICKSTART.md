@@ -23,9 +23,16 @@
 
 ### Analyze a Ticket
 
-**Basic analysis:**
+**⭐ Recommended: Single command with auto-analysis:**
+```bash
+# Fetches ticket, processes logs, and automatically invokes GitHub Copilot
+python -m src.cli analyze PROJ-123 --keywords "error,crash" --auto-analyze
+```
+
+**Basic analysis (manual):**
 ```bash
 python -m src.cli analyze PROJ-123
+# Then manually ask Copilot to analyze the generated file
 ```
 
 **With keywords to filter logs:**
@@ -50,6 +57,7 @@ python -m src.cli analyze PROJ-123 \
   --max-lines 1000 \
   --context-lines 10 \
   --depth deep \
+  --auto-analyze \
   --output analysis_results/PROJ-123.md
 ```
 
@@ -67,25 +75,30 @@ python -m src.cli list --query "project = MYPROJ AND priority = High"
 
 ## How It Works
 
-1. **Fetch Ticket Data**: Uses Atlassian MCP to retrieve ticket details, comments, and attachments
-2. **Process Logs**: Extracts text from log files and zip archives
-3. **Filter & Optimize**: Applies keyword filtering and token optimization
-4. **Generate Analysis Input**: Prepares structured data for GitHub Copilot
-5. **Analyze with Copilot**: Uses the `jira_analyzer` skill to perform analysis
+1. **Fetch Ticket Data**: Uses Jira REST API to retrieve ticket details, comments, and attachments
+2. **Download Attachments**: Downloads log files and zip archives
+3. **Process Logs**: Extracts text from log files and zip archives
+4. **Filter & Optimize**: Applies keyword filtering and token optimization
+5. **Generate Analysis File**: Creates a markdown file with structured ticket data
+6. **Analyze with Copilot** (if --auto-analyze): Automatically invokes GitHub Copilot CLI for analysis
 
-## Using the Copilot Skill
+## Using Auto-Analysis
 
-The tool generates an analysis input file. To complete the analysis:
+With the `--auto-analyze` flag, the tool automatically invokes GitHub Copilot CLI:
 
 ```bash
-# After running analyze command, you'll get a temp file path
-gh copilot --skill skills/jira_analyzer.md < /tmp/jira_analysis_PROJ-123.txt
+# Single command does everything
+python -m src.cli analyze PROJ-123 --keywords "error,crash" --auto-analyze
 ```
 
-Or use the skill directly in Copilot CLI:
-```
-@jira_analyzer analyze this ticket:
-[paste analysis input]
+**Without auto-analyze:**
+```bash
+# Step 1: Generate analysis file
+python -m src.cli analyze PROJ-123
+
+# Step 2: Manually ask Copilot
+# The tool shows the path, e.g.: analysis_results/PROJ-123/analysis.md
+# Then you can ask: "Analyze analysis_results/PROJ-123/analysis.md using jira_analyzer framework"
 ```
 
 ## Configuration File
@@ -158,7 +171,7 @@ analysis_depth: "deep"
 python -m src.cli analyze PROD-456 \
   --keywords "OutOfMemory,GC,heap" \
   --depth deep \
-  --output reports/oom-analysis.md
+  --auto-analyze
 ```
 
 ### Example 2: Timeout Issues
@@ -166,7 +179,7 @@ python -m src.cli analyze PROD-456 \
 python -m src.cli analyze API-789 \
   --keywords "timeout,connection,slow" \
   --context-lines 10 \
-  --output reports/timeout-analysis.md
+  --auto-analyze
 ```
 
 ### Example 3: Batch Analysis
@@ -174,9 +187,9 @@ python -m src.cli analyze API-789 \
 # List high priority bugs
 python -m src.cli list --query "priority = High AND status = Open" --limit 5
 
-# Analyze each one
+# Analyze each one with auto-analysis
 for ticket in PROJ-123 PROJ-124 PROJ-125; do
-  python -m src.cli analyze $ticket --output "reports/${ticket}.md"
+  python -m src.cli analyze $ticket --auto-analyze
 done
 ```
 

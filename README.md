@@ -8,8 +8,9 @@ A CLI tool that analyzes Jira bug tickets using GitHub Copilot as the analysis e
 - 🔍 **Keyword Filtering**: Reduces noise and optimizes token usage
 - 📊 **Comprehensive Analysis**: Summaries, patterns, and root cause suggestions
 - 📦 **Zip Support**: Handles compressed log files
-- 🔌 **Atlassian MCP Integration**: Direct Jira API access
+- 🔌 **Direct Jira API**: Fetches tickets, comments, and attachments via REST API
 - 💾 **Flexible Output**: Terminal display or save to files (Markdown/JSON)
+- 🤖 **Auto-Analysis**: Automatically invoke GitHub Copilot CLI after processing
 
 ## Installation
 
@@ -45,6 +46,13 @@ ATLASSIAN_EMAIL=your-email@example.com
 
 ### Quick Start (Recommended)
 
+**Single command with automatic analysis:**
+```bash
+# Analyze ticket and automatically invoke GitHub Copilot
+python -m src.cli analyze TICKET-123 --keywords "error,crash,exception" --auto-analyze
+```
+
+**Or use the wrapper script:**
 ```bash
 # Use the wrapper script - handles everything automatically
 ./analyze_ticket.sh TICKET-123
@@ -56,11 +64,11 @@ ATLASSIAN_EMAIL=your-email@example.com
 ### Manual Usage
 
 ```bash
-# Step 1: Prepare analysis
+# Step 1: Prepare analysis (without auto-analysis)
 python -m src.cli analyze TICKET-123
 
-# Step 2: Copy the temp file path shown, then run:
-cat /tmp/jira_analysis_TICKET-123.txt | gh copilot
+# Step 2: Manually ask Copilot to analyze
+# (Path shown in output: analysis_results/TICKET-123/analysis.md)
 
 # Or analyze with keywords
 python -m src.cli analyze TICKET-123 --keywords "error,timeout,failed"
