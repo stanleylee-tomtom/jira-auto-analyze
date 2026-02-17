@@ -1,6 +1,7 @@
 """Analysis orchestrator using REST API to fetch and process Jira tickets."""
 import subprocess
 import sys
+import os
 from pathlib import Path
 from typing import Dict, Any, List
 from rich.console import Console
@@ -132,12 +133,22 @@ Example: "Analyze {analysis_path} using jira_analyzer framework"
     
     def _invoke_copilot(self, analysis_path: str):
         """Invoke GitHub Copilot CLI to analyze the generated file."""
-        console.print("\n[bold blue]🤖 Invoking GitHub Copilot...[/bold blue]\n")
+        console.print("\n[bold blue]🤖 Preparing Copilot Analysis...[/bold blue]\n")
+        
+        # Check if we're already inside a Copilot CLI session
+        if os.environ.get('GITHUB_COPILOT_CLI_SESSION') or os.environ.get('COPILOT_SESSION_ID'):
+            console.print("[yellow]⚠ Already inside a GitHub Copilot CLI session[/yellow]")
+            console.print("[dim]Cannot invoke gh copilot recursively.[/dim]\n")
+            console.print(f"[bold cyan]📋 Please ask Copilot:[/bold cyan]")
+            console.print(f"[green]Analyze {analysis_path} using jira_analyzer framework[/green]\n")
+            return
         
         # Construct the prompt
         prompt = f"Analyze {analysis_path} using jira_analyzer framework"
         
         try:
+            console.print(f"[dim]Running: gh copilot...[/dim]\n")
+            
             # Use subprocess to invoke gh copilot with the prompt via stdin
             process = subprocess.Popen(
                 ['gh', 'copilot'],
@@ -151,12 +162,14 @@ Example: "Analyze {analysis_path} using jira_analyzer framework"
             process.communicate(input=prompt)
             
             if process.returncode != 0:
-                console.print(f"[yellow]⚠ GitHub Copilot exited with code {process.returncode}[/yellow]")
+                console.print(f"\n[yellow]⚠ GitHub Copilot exited with code {process.returncode}[/yellow]")
+                console.print(f"[dim]You can manually ask: Analyze {analysis_path} using jira_analyzer framework[/dim]")
         except FileNotFoundError:
             console.print("[red]✗ GitHub Copilot CLI (gh copilot) not found. Please install it first.[/red]")
             console.print("[dim]Install with: gh extension install github/gh-copilot[/dim]")
         except Exception as e:
             console.print(f"[red]✗ Error invoking GitHub Copilot: {str(e)}[/red]")
+            console.print(f"[dim]You can manually ask: Analyze {analysis_path} using jira_analyzer framework[/dim]")
 
 def analyze_ticket(options: Dict[str, Any]) -> str:
     analyzer = TicketAnalyzer(options)
