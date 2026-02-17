@@ -21,6 +21,17 @@ sampling:
   head_lines: 200  # First N lines
   tail_lines: 200  # Last N lines
 
+# Bot user filtering (comments from these users will be excluded from analysis)
+# Bot comments are typically for auto-triage and not relevant to technical analysis
+ignore_bot_users:
+  - "svc_kaizen_atlassian"  # Auto-triage bot
+  - "svc_jiradel_svc"       # Jira delivery service
+  - "svc_navsdk_jira"       # NavSDK automation
+  - "svc_"                  # Any service account starting with svc_
+  - "automation"
+  - "bot"
+  # Add more bot usernames here as needed
+
 # Output settings
 output:
   format: "markdown"  # markdown, json, terminal

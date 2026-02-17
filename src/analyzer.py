@@ -24,6 +24,17 @@ class TicketAnalyzer:
         keywords = options.get('keywords', [])
         context_lines = options.get('context_lines', 5)
         self.log_filter = LogFilter(keywords=keywords, context_lines_before=context_lines, context_lines_after=context_lines)
+        
+        # Get bot users to ignore from config, with defaults
+        # These are typically service accounts for auto-triage/automation
+        self.ignore_bot_users = options.get('ignore_bot_users', [
+            'svc_kaizen_atlassian',
+            'svc_jiradel_svc',
+            'svc_navsdk_jira',
+            'automation', 
+            'bot',
+            'svc_'  # Catch any service account starting with svc_
+        ])
     
     def analyze(self, ticket_id: str) -> Dict[str, Any]:
         with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
@@ -85,6 +96,22 @@ class TicketAnalyzer:
             })
         return filtered
     
+    def _filter_bot_comments(self, comments):
+        """Filter out bot comments (e.g., svc_kaizen_atlassian for auto-triage)."""
+        filtered = []
+        for comment in comments:
+            author_name = comment.get('author', {}).get('displayName', '').lower()
+            account_id = comment.get('author', {}).get('accountId', '').lower()
+            
+            # Check if author name or account ID contains bot identifiers
+            is_bot = any(bot.lower() in author_name or bot.lower() in account_id 
+                        for bot in self.ignore_bot_users)
+            
+            if not is_bot:
+                filtered.append(comment)
+        
+        return filtered
+    
     def _generate_analysis_file(self, ticket_id, ticket_data, comments, filtered_logs):
         output_dir = Path(self.options.get('output_dir', './analysis_results')) / ticket_id
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -98,9 +125,13 @@ class TicketAnalyzer:
         lines.append("## Description")
         lines.append(ticket_data.get('description', 'No description'))
         lines.append("")
-        if comments:
-            lines.append(f"## Comments ({len(comments)})")
-            for i, c in enumerate(comments[:10], 1):
+        
+        # Filter out bot comments
+        human_comments = self._filter_bot_comments(comments)
+        
+        if human_comments:
+            lines.append(f"## Comments ({len(human_comments)})")
+            for i, c in enumerate(human_comments[:10], 1):
                 author = c.get('author', {}).get('displayName', 'Unknown')
                 body = c.get('body', '')
                 if isinstance(body, dict):

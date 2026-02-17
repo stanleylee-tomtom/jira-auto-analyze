@@ -19,11 +19,14 @@ Perform a structured analysis covering these areas:
 - State the reported symptoms and impact
 - Note the severity/priority level
 
-### 2. Root Cause Analysis
-- Identify the primary root cause if evident from logs/description
+### 2. Possible Root Causes (NOT Solutions)
+- Identify **possible** root causes based on evidence from logs/description
 - List contributing factors
 - Distinguish between symptoms and actual causes
 - Point to specific log lines or stack traces that reveal the issue
+- **IMPORTANT**: Focus on identifying what might be causing the issue, NOT how to fix it
+- Present root causes as hypotheses that need confirmation
+- Avoid suggesting solutions or fixes - the root cause is not yet confirmed
 
 ### 3. Pattern Recognition
 - Identify recurring patterns in logs (repeated errors, sequences)
@@ -39,12 +42,13 @@ Perform a structured analysis covering these areas:
   - System state at time of failure
   - Resource usage indicators (memory, connections, etc.)
 
-### 5. Recommendations
-Provide actionable recommendations:
-- **Immediate actions**: Quick fixes or workarounds
-- **Investigation steps**: What to check next, additional logs needed
-- **Long-term fixes**: Proper solutions to prevent recurrence
-- **Monitoring**: What to monitor to detect early warning signs
+### 5. Next Steps for Investigation
+Focus on **investigation steps only** (NOT solutions):
+- **What to verify**: Steps to confirm the suspected root cause
+- **Additional data needed**: What logs, metrics, or tests would help
+- **Diagnostic steps**: How to reproduce or narrow down the issue
+- **Monitoring**: What to observe to gather more evidence
+- **AVOID**: Do not provide solutions or fixes - focus on confirming the root cause first
 
 ## Output Format
 
@@ -56,8 +60,8 @@ Structure your analysis in markdown with clear sections:
 ## 📋 Summary
 [Brief overview]
 
-## 🔍 Root Cause
-[Primary cause with evidence]
+## 🔍 Possible Root Causes
+[Hypothesized causes with supporting evidence - NOT confirmed solutions]
 
 ## 📊 Patterns & Observations
 - Pattern 1: [description]
@@ -71,19 +75,19 @@ Structure your analysis in markdown with clear sections:
 [Relevant stack trace excerpt]
 \`\`\`
 
-## 💡 Recommendations
+## 💡 Next Steps for Investigation
 
-### Immediate Actions
-1. [Action 1]
-2. [Action 2]
+### Verify Root Cause
+1. [Verification step 1]
+2. [Verification step 2]
 
-### Further Investigation
-1. [Investigation step 1]
-2. [Investigation step 2]
+### Additional Data Needed
+1. [What logs/metrics to collect]
+2. [What tests to run]
 
-### Long-term Solutions
-1. [Solution 1]
-2. [Solution 2]
+### Diagnostic Steps
+1. [How to reproduce or isolate]
+2. [What to check next]
 
 ## ⚠️ Risk Assessment
 [Severity, likelihood of recurrence, business impact]
@@ -91,14 +95,26 @@ Structure your analysis in markdown with clear sections:
 
 ## Guidelines
 
+**Filter Bot Comments:**
+- **IGNORE all comments from bot users** (e.g., svc_kaizen_atlassian)
+- Bot comments are typically for auto-triage and not relevant to technical analysis
+- Focus only on human-written comments and descriptions
+
 **Be Evidence-Based:**
 - Quote specific log lines, error messages, or stack traces
 - Reference line numbers when available
 - Don't speculate without evidence
+- Present findings as possibilities, not certainties (e.g., "This suggests..." rather than "This is...")
+
+**Focus on Root Cause, Not Solutions:**
+- The goal is to identify WHAT is wrong, not HOW to fix it
+- Root cause analysis should be diagnostic, not prescriptive
+- Avoid suggesting solutions, fixes, or workarounds
+- Frame your analysis as "possible causes" that need confirmation
 
 **Be Practical:**
-- Focus on actionable insights
-- Prioritize recommendations by impact and effort
+- Focus on actionable investigation steps
+- Prioritize what to check next by likelihood and impact
 - Consider the context and constraints
 
 **Be Clear:**
@@ -109,7 +125,7 @@ Structure your analysis in markdown with clear sections:
 **Be Thorough but Concise:**
 - Cover all important aspects
 - Skip obvious or redundant information
-- Focus on what matters for resolution
+- Focus on what matters for confirming the root cause
 
 ## Special Considerations
 
@@ -118,8 +134,10 @@ Structure your analysis in markdown with clear sections:
 - Suggest which additional logs would help
 
 **When root cause is unclear:**
-- List possible causes with likelihood
+- List possible causes with likelihood assessment
 - Suggest diagnostic steps to narrow down
+- Be explicit about uncertainty - use phrases like "possibly", "likely", "suggests"
+- Avoid presenting any cause as definitive without strong evidence
 
 **When multiple errors appear:**
 - Identify primary vs. secondary failures
