@@ -43,18 +43,33 @@ ATLASSIAN_EMAIL=your-email@example.com
 
 ## Usage
 
-```bash
-# Analyze a single ticket
-jira-analyze analyze TICKET-123
+### Quick Start (Recommended)
 
-# With custom keywords
-jira-analyze analyze TICKET-123 --keywords "error,timeout,failed"
+```bash
+# Use the wrapper script - handles everything automatically
+./analyze_ticket.sh TICKET-123
+
+# With options
+./analyze_ticket.sh TICKET-123 --keywords "error,timeout"
+```
+
+### Manual Usage
+
+```bash
+# Step 1: Prepare analysis
+python -m src.cli analyze TICKET-123
+
+# Step 2: Copy the temp file path shown, then run:
+cat /tmp/jira_analysis_TICKET-123.txt | gh copilot
+
+# Or analyze with keywords
+python -m src.cli analyze TICKET-123 --keywords "error,timeout,failed"
 
 # Save output to file
-jira-analyze analyze TICKET-123 --output results.md
+python -m src.cli analyze TICKET-123 --output results.md
 
 # Use custom config
-jira-analyze analyze TICKET-123 --config my_config.yaml
+python -m src.cli analyze TICKET-123 --config my_config.yaml
 ```
 
 ## Requirements

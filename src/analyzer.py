@@ -249,9 +249,20 @@ def analyze_ticket(options: Dict[str, Any]) -> str:
     
     console.print(f"[dim]Analysis input saved to: {temp_file}[/dim]")
     console.print("")
-    console.print("[bold yellow]To complete the analysis, run:[/bold yellow]")
-    console.print(f"[cyan]gh copilot --skill {result['skill_file']} < {temp_file}[/cyan]")
+    console.print("[bold yellow]📋 Next Steps:[/bold yellow]")
     console.print("")
-    console.print("[dim]Or copy the skill file path and analysis input to use with @jira_analyzer skill[/dim]")
+    console.print("1️⃣  [bold]Option 1: Use GitHub Copilot CLI interactively[/bold]")
+    console.print("   Run: [cyan]gh copilot[/cyan]")
+    console.print("   Then ask: [cyan]\"Analyze this Jira ticket and provide root cause analysis\"[/cyan]")
+    console.print(f"   Then paste the content from: [cyan]{temp_file}[/cyan]")
+    console.print("")
+    console.print("2️⃣  [bold]Option 2: Use as a prompt (recommended)[/bold]")
+    console.print(f"   [cyan]cat {temp_file} | gh copilot[/cyan]")
+    console.print("")
+    console.print("3️⃣  [bold]Option 3: Copy the analysis input[/bold]")
+    console.print(f"   [cyan]cat {temp_file}[/cyan]")
+    console.print("   Then paste into any AI assistant with the skill instructions")
+    console.print("")
+    console.print(f"[dim]Skill instructions: {result['skill_file']}[/dim]")
     
     return result['analysis_input']
