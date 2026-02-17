@@ -72,7 +72,12 @@ def cli():
     is_flag=True,
     help='Skip processing attachments'
 )
-def analyze(ticket_id, keywords, config, output, max_lines, context_lines, depth, no_attachments):
+@click.option(
+    '--attachment-dir',
+    type=click.Path(exists=True),
+    help='Directory containing pre-downloaded attachments (use when Copilot CLI downloaded them)'
+)
+def analyze(ticket_id, keywords, config, output, max_lines, context_lines, depth, no_attachments, attachment_dir):
     """Analyze a Jira ticket by ID.
     
     Example:
@@ -92,6 +97,7 @@ def analyze(ticket_id, keywords, config, output, max_lines, context_lines, depth
         'context_lines': context_lines,
         'depth': depth,
         'no_attachments': no_attachments,
+        'attachment_dir': attachment_dir,
         'output_path': output,
     }
     

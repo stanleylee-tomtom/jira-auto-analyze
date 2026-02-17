@@ -87,35 +87,73 @@ class TicketAnalyzer:
         }
     
     def _fetch_ticket_data(self, ticket_id: str) -> Dict[str, Any]:
-        """Fetch ticket data from Jira."""
-        console.print(f"[dim]Fetching ticket {ticket_id}...[/dim]")
+        """Fetch ticket data from Jira.
         
-        # Note: This would use Atlassian MCP tools in the actual Copilot CLI environment
-        # For now, return a structure that the skill will populate
+        Note: This creates a placeholder. The actual ticket fetching should be done
+        by GitHub Copilot CLI using Atlassian MCP tools when you ask:
+        
+        "Fetch and analyze Jira ticket {ticket_id} using my credentials"
+        
+        For now, this returns a template that reminds you to fetch via Copilot.
+        """
+        console.print(f"[yellow]⚠ Ticket data fetch requires GitHub Copilot CLI with Atlassian MCP[/yellow]")
+        console.print(f"[dim]Creating analysis template for {ticket_id}...[/dim]")
+        
         return {
             'id': ticket_id,
             'key': ticket_id,
-            'summary': '',
-            'description': '',
-            'status': '',
-            'priority': '',
-            'comments': [],
-            'attachments': []
+            'summary': f'[ASK COPILOT: Fetch summary for {ticket_id}]',
+            'description': f'[ASK COPILOT: Fetch description for {ticket_id}]',
+            'status': '[TO BE FETCHED]',
+            'priority': '[TO BE FETCHED]',
+            'comments': ['[ASK COPILOT: Fetch comments using atlassian-getJiraIssue]'],
+            'attachments': ['[ASK COPILOT: List attachments and download log files]'],
+            'note': f'To fetch real data, ask Copilot: "Fetch Jira ticket {ticket_id} from cloudId {os.getenv("ATLASSIAN_CLOUD_ID")}"'
         }
     
     def _process_attachments(self, ticket_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Process ticket attachments."""
+        # Check if attachments were pre-downloaded
+        attachment_dir = self.options.get('attachment_dir')
+        
+        if attachment_dir:
+            return self._process_local_attachments(attachment_dir)
+        
         attachments = ticket_data.get('attachments', [])
         
         if not attachments:
-            console.print("[dim]No attachments found[/dim]")
+            console.print("[yellow]⚠ No attachments found in ticket data[/yellow]")
+            console.print("[dim]Tip: Ask Copilot CLI to download attachments first,[/dim]")
+            console.print("[dim]     then use --attachment-dir flag[/dim]")
             return []
         
+        console.print("[yellow]⚠ Cannot download attachments directly (requires Copilot CLI with MCP)[/yellow]")
+        console.print(f"[dim]Ask Copilot: 'Download attachments from {ticket_data['key']} to /tmp/jira_attachments_{ticket_data['key']}'[/dim]")
+        return []
+    
+    def _process_local_attachments(self, attachment_dir: str) -> List[Dict[str, Any]]:
+        """Process pre-downloaded attachments from a directory."""
+        from pathlib import Path
+        
+        attachment_path = Path(attachment_dir)
+        if not attachment_path.exists():
+            console.print(f"[red]✗ Attachment directory not found: {attachment_dir}[/red]")
+            return []
+        
+        console.print(f"[cyan]Processing attachments from: {attachment_dir}[/cyan]")
+        
         all_logs = []
-        for attachment in attachments:
-            # In actual implementation, download and process
-            # For now, this is a placeholder
-            pass
+        log_files = list(attachment_path.glob('**/*'))
+        
+        for file_path in log_files:
+            if file_path.is_file():
+                result = self.log_processor.process_attachment(str(file_path))
+                all_logs.extend(result)
+        
+        if all_logs:
+            console.print(f"[green]✓ Processed {len(all_logs)} log file(s)[/green]")
+        else:
+            console.print("[yellow]⚠ No processable log files found[/yellow]")
         
         return all_logs
     
