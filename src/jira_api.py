@@ -99,6 +99,34 @@ class JiraRestAPI:
             console.print(f"[yellow]⚠ Could not fetch comments: {str(e)}[/yellow]")
             return []
     
+    def search_issues(self, jql: str, max_results: int = 50) -> List[Dict[str, Any]]:
+        """
+        Search issues using JQL.
+        
+        Args:
+            jql: JQL query string
+            max_results: Maximum results to return
+            
+        Returns:
+            List of issues
+        """
+        url = f'{self.base_url}/rest/api/3/search/jql'
+        
+        try:
+            response = requests.post(
+                url,
+                auth=self.auth,
+                headers=self.headers,
+                json={'jql': jql, 'maxResults': max_results},
+                timeout=30
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get('issues', [])
+        except requests.exceptions.RequestException as e:
+            console.print(f"[yellow]⚠ Search failed: {str(e)}[/yellow]")
+            return []
+    
     def get_attachments(self, issue_key: str) -> List[Dict[str, Any]]:
         """
         Get attachment metadata for an issue.
