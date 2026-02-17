@@ -1,5 +1,9 @@
 # Jira Auto Analyze
 
+[![GitHub](https://img.shields.io/badge/GitHub-jira--auto--analyze-blue?logo=github)](https://github.com/stanleylee-tomtom/jira-auto-analyze)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 A CLI tool that analyzes Jira bug tickets using GitHub Copilot as the analysis engine. It intelligently processes ticket comments and log file attachments (including zipped files) to provide comprehensive analysis with summaries, pattern detection, and root cause suggestions.
 
 ## Features
@@ -16,8 +20,8 @@ A CLI tool that analyzes Jira bug tickets using GitHub Copilot as the analysis e
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd jira_auto_analyze
+git clone https://github.com/stanleylee-tomtom/jira-auto-analyze.git
+cd jira-auto-analyze
 
 # Install dependencies
 pip install -r requirements.txt

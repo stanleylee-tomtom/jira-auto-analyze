@@ -1,0 +1,9 @@
+# Ensure .env is never committed
+.env filter=git-crypt diff=git-crypt
+.env merge=binary
+
+# LF line endings
+*.py text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.yaml text eol=lf
