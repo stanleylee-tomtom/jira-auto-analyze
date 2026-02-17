@@ -1,0 +1,31 @@
+# Sample configuration for jira-auto-analyze
+
+# Keywords to highlight and extract context around
+keywords:
+  - "error"
+  - "exception"
+  - "failed"
+  - "timeout"
+  - "null pointer"
+
+# Context lines before and after keyword matches
+context_lines_before: 5
+context_lines_after: 5
+
+# Maximum lines to extract from logs (to manage token usage)
+max_log_lines: 500
+
+# Sampling strategy for large logs
+sampling:
+  enabled: true
+  head_lines: 200  # First N lines
+  tail_lines: 200  # Last N lines
+
+# Output settings
+output:
+  format: "markdown"  # markdown, json, terminal
+  save_to_file: true
+  output_dir: "./analysis_results"
+
+# Analysis depth
+analysis_depth: "deep"  # quick, normal, deep
