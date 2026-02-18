@@ -151,12 +151,13 @@ def list(query, project, status, limit):
         jira-analyze list --project PROJ --status "Open"
         jira-analyze list --query "project = PROJ AND status = Open"
     """
-    from .jira_client import JiraClient
+    from .jira_api import JiraRestAPI
+    import requests
     
     console.print("\n[bold blue]📋 Fetching tickets...[/bold blue]\n")
     
     try:
-        client = JiraClient()
+        api = JiraRestAPI()
         
         # Build JQL query
         if query:
@@ -169,7 +170,25 @@ def list(query, project, status, limit):
                 filters.append(f'status = "{status}"')
             jql = ' AND '.join(filters) if filters else 'order by created DESC'
         
-        tickets = client.search_tickets(jql, limit=limit)
+        # Use the search endpoint directly
+        url = f"{api.base_url}/rest/api/3/search/jql"
+        response = requests.post(
+            url,
+            auth=api.auth,
+            headers=api.headers,
+            json={
+                'jql': jql,
+                'maxResults': limit,
+                'fields': ['summary', 'status', 'priority', 'created']
+            }
+        )
+        response.raise_for_status()
+        data = response.json()
+        issues = data.get('issues', [])
+        
+        if not issues:
+            console.print("[yellow]No tickets found matching the query.[/yellow]\n")
+            return
         
         # Display results in a table
         table = Table(show_header=True, header_style="bold magenta")
@@ -178,16 +197,17 @@ def list(query, project, status, limit):
         table.add_column("Status", style="yellow")
         table.add_column("Priority", style="red")
         
-        for ticket in tickets:
+        for issue in issues:
+            fields = issue.get('fields', {})
             table.add_row(
-                ticket.get('key', 'N/A'),
-                ticket.get('summary', 'N/A')[:50],
-                ticket.get('status', 'N/A'),
-                ticket.get('priority', 'N/A')
+                issue.get('key', 'N/A'),
+                fields.get('summary', 'N/A')[:50],
+                fields.get('status', {}).get('name', 'N/A'),
+                fields.get('priority', {}).get('name', 'N/A')
             )
         
         console.print(table)
-        console.print(f"\n[dim]Showing {len(tickets)} ticket(s)[/dim]\n")
+        console.print(f"\n[dim]Showing {len(issues)} ticket(s)[/dim]\n")
         
     except Exception as e:
         console.print(f"[red]✗ Error: {str(e)}[/red]")

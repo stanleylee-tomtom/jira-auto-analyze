@@ -9,20 +9,7 @@ You need three pieces of information:
 
 ---
 
-## Quick Method: I Can Help You Now!
-
-Since you're already using GitHub Copilot CLI with Atlassian MCP, I can get your credentials for you right now.
-
-Just ask me:
-- **"Get my Atlassian cloud ID"**
-- **"Show my accessible Atlassian resources"**
-- **"What's my Atlassian user info?"**
-
-I'll use the Atlassian MCP tools to retrieve this information.
-
----
-
-## Manual Method
+## Getting Your Credentials
 
 ### 1. Get Your Cloud ID
 
@@ -66,7 +53,8 @@ This is the email address you use to log into Jira/Atlassian.
 ## Configure .env File
 
 ```bash
-cd /Users/stanleylee/code/jira_auto_analyze
+cd jira-auto-analyze
+cp .env.example .env
 nano .env
 ```
 
@@ -86,6 +74,12 @@ Both work as Cloud ID.
 ---
 
 ## Verify Setup
+
+```bash
+python test_connection.py
+```
+
+Or:
 
 ```bash
 python -m src.cli config

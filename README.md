@@ -87,8 +87,40 @@ python -m src.cli analyze TICKET-123 --config my_config.yaml
 ## Requirements
 
 - Python 3.8+
-- GitHub Copilot CLI access
+- GitHub Copilot CLI (with `gh copilot` extension installed)
 - Atlassian account with API access
+
+## Next Steps
+
+Once installed and configured:
+
+1. **Test your setup:**
+   ```bash
+   python test_connection.py
+   ```
+
+2. **Try analyzing a ticket:**
+   ```bash
+   python -m src.cli analyze YOUR-TICKET-ID --keywords "error,crash" --auto-analyze
+   ```
+
+3. **Customize for your needs:**
+   - Create a `config.yaml` based on `examples/sample_config.yaml`
+   - Add your commonly-used keywords
+   - Configure bot user filters for your organization
+
+4. **Learn more:**
+   - Read [QUICKSTART.md](QUICKSTART.md) for detailed usage
+   - Check [docs/AUTO_ANALYZE_GUIDE.md](docs/AUTO_ANALYZE_GUIDE.md) for auto-analysis options
+   - See [docs/ANALYSIS_GUIDELINES.md](docs/ANALYSIS_GUIDELINES.md) for analysis philosophy
+
+## Contributing
+
+This tool is designed for analyzing Jira bug tickets. Contributions are welcome:
+- Bug reports and fixes
+- Feature requests
+- Documentation improvements
+- Additional filtering strategies
 
 ## License
 

@@ -32,10 +32,10 @@ python -m src.cli analyze GOSDK-196630 --keywords "crash,error,exception" --auto
    - Uses `jira_analyzer` framework
    - Generates comprehensive analysis with:
      - 📋 Summary
-     - 🔍 Root Cause Analysis
+     - 🔍 Possible Root Causes
      - 📊 Patterns & Observations
      - 🔧 Technical Details
-     - 💡 Recommendations
+     - 💡 Next Steps for Investigation
 
 ## Output Structure
 
