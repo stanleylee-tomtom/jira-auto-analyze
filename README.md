@@ -116,11 +116,31 @@ Once installed and configured:
 
 ## Contributing
 
-This tool is designed for analyzing Jira bug tickets. Contributions are welcome:
-- Bug reports and fixes
-- Feature requests
-- Documentation improvements
-- Additional filtering strategies
+This tool is designed for analyzing Jira bug tickets. Contributions are welcome!
+
+### For Human Contributors
+See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Development guidelines
+- Code style conventions
+- Testing requirements
+- Pull request process
+
+### For AI Contributors
+See [AI_DEVELOPMENT_GUIDE.md](AI_DEVELOPMENT_GUIDE.md) for:
+- Detailed development instructions
+- Common tasks and patterns
+- Testing strategies
+- Troubleshooting tips
+
+### Development Skills
+The [skills/development_assistant.md](skills/development_assistant.md) provides a framework for AI tools to understand and work with this codebase effectively.
+
+**Key Guidelines:**
+- Follow the diagnostic (not prescriptive) analysis philosophy
+- Maintain REST API approach (no MCP dependencies)
+- Keep bot comment filtering logic intact
+- Test changes with real Jira tickets
+- Update documentation with code changes
 
 ## License
 
