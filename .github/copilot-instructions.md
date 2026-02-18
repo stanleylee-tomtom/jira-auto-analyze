@@ -1,140 +1,111 @@
-# GitHub Copilot Instructions for jira-auto-analyze
+# GitHub Copilot Development Instructions
 
 ## Project Overview
 
-A CLI tool that analyzes Jira bug tickets using AI. It fetches ticket data, downloads attachments (including logs), filters noise, and generates diagnostic analysis using GitHub Copilot.
+CLI tool that fetches Jira tickets, downloads attachments, filters logs, and prepares data for AI analysis.
 
-**Core Philosophy: DIAGNOSTIC, NOT PRESCRIPTIVE**
-- Identify possible root causes (NOT solutions)
-- Present findings as hypotheses requiring confirmation
-- Use uncertainty language ("suggests", "likely", "indicates")
-- Avoid prescriptive recommendations ("the fix is", "to solve this")
-
-## Architecture
-
+**Architecture Flow:**
 ```
 User → CLI → JiraAPI → Analyzer → OutputGenerator → [Optional: gh copilot]
-                ↓
-         Download attachments
-                ↓
-         Filter logs (keywords)
-                ↓
-         Generate analysis input
 ```
 
 **Key Components:**
-- `src/cli.py` - Click-based CLI (analyze, list, config commands)
-- `src/jira_api.py` - REST API v3 client (NO MCP)
+- `src/cli.py` - Click-based CLI (analyze, list, config)
+- `src/jira_api.py` - REST API v3 client
 - `src/analyzer.py` - Main orchestration + bot filtering
 - `src/attachment_handler.py` - Download/extract logs
 - `src/log_processor.py` - Keyword filtering, token optimization
 - `src/output_generator.py` - Prepare analysis input
-- `skills/jira_analyzer.md` - Analysis framework for Copilot
+- `skills/jira_analyzer.md` - **Analysis rules for Copilot CLI**
 
-## Critical Design Decisions
+## Critical Design Rules
 
-### 1. REST API, Not MCP
-- Direct Jira REST API v3 usage via `requests`
+### 1. REST API Only (No MCP)
+- Use Jira REST API v3 via `requests` library
 - Single-command workflow: `jira-analyze TICKET-123`
-- Never suggest or implement MCP/Atlassian integration
+- **Never** suggest or add MCP/Atlassian MCP integration
 
 ### 2. Bot Comment Filtering
-- Automatically filters service accounts: `svc_kaizen_atlassian`, `svc_jiradel_svc`, `svc_navsdk_jira`, `svc_*`
-- Configured via `ignore_bot_users` in config.yaml
-- Critical for reducing noise in analysis
+- Auto-filter service accounts: `svc_*` pattern
+- Configured in `config.yaml` → `ignore_bot_users`
+- Filter logic in `src/analyzer.py` lines 95-108
 
-### 3. Auto-Analyze with Session Detection
-- `--auto-analyze` flag invokes `gh copilot` automatically
-- Detects nested sessions (GITHUB_COPILOT_CLI_SESSION, COPILOT_SESSION_ID)
-- Falls back to manual prompt when inside Copilot session
+### 3. Auto-Analyze Session Detection
+- Detects env vars: `GITHUB_COPILOT_CLI_SESSION`, `COPILOT_SESSION_ID`
+- Prevents recursive `gh copilot` invocation
+- Implementation in `src/analyzer.py` lines 138-170
 
-### 4. Diagnostic Analysis Framework
-- **Sections:** Summary → Possible Root Causes → Patterns & Observations → Technical Details → Next Steps for Investigation → Risk Assessment
-- **Language:** "likely", "suggests", "to confirm" (NOT "the fix is", "the solution")
-- **Defined in:** `skills/jira_analyzer.md` (read this first!)
+## Development Patterns
 
-## Common Tasks
-
-### Adding a CLI Option
+### Adding CLI Options
 ```python
-# In src/cli.py
+# src/cli.py
 @click.option('--new-option', help='Description')
 def analyze(ticket_id, new_option):
-    # Update Analyzer initialization
     analyzer = TicketAnalyzer(config, new_option=new_option)
 ```
 
-### Adding a Log Filter
+### Adding Log Filters
 ```python
-# In src/log_processor.py - LogProcessor.filter_by_keywords()
+# src/log_processor.py
 def filter_by_keywords(self, content, keywords):
     lines = content.split('\n')
-    filtered = [line for line in lines if any(kw in line for kw in keywords)]
-    return '\n'.join(filtered)
+    return '\n'.join([l for l in lines if any(k in l for k in keywords)])
 ```
 
-### Updating Analysis Framework
-**⚠️ Changes affect ALL future analyses**
-1. Edit `skills/jira_analyzer.md`
-2. Test with: `jira-analyze GOSDK-196630 --auto-analyze`
-3. Review output to verify changes applied
-
-### Fixing API Issues
+### Modifying Bot Filter
 ```python
-# In src/jira_api.py
-# Jira API v3 uses /rest/api/3/search/jql (not /rest/api/3/search)
+# src/analyzer.py - _filter_bot_comments()
+# Update ignore_bot_users list or pattern matching
+```
+
+### API Changes
+```python
+# src/jira_api.py
+# Jira API v3: /rest/api/3/search/jql (not /rest/api/3/search)
 # Returns ADF format - extract text from content nodes
 ```
 
-## Testing
+## Testing Requirements
 
 ```bash
-# Test with real ticket
+# Always test with real ticket before committing
 jira-analyze GOSDK-196630 --auto-analyze
 
-# Test bot filtering (should remove svc_* comments)
-jira-analyze GOSDK-196630 --keywords "error,exception" 
+# Verify bot filtering works
+jira-analyze GOSDK-196630 --keywords "error"
 
 # Test list command
-jira-analyze list "project = GOSDK AND status = Open"
+jira-analyze list "project = GOSDK"
 ```
 
 ## What NOT to Do
 
-❌ **Don't** add MCP/Atlassian integration (removed for good reasons)  
-❌ **Don't** make analysis prescriptive (provide solutions)  
-❌ **Don't** remove bot filtering (svc_* accounts add noise)  
-❌ **Don't** change diagnostic language to certainty ("the fix is...")  
-❌ **Don't** skip testing with real Jira tickets  
-❌ **Don't** break the single-command workflow  
+❌ Add MCP/Atlassian MCP integration  
+❌ Remove bot filtering logic  
+❌ Skip testing with real Jira tickets  
+❌ Break single-command workflow  
+❌ Modify analysis rules (those belong in `skills/jira_analyzer.md`)
 
 ## File Reference
 
 **Core Logic:**
-- `src/analyzer.py` - Main workflow, bot filtering (lines 95-108)
-- `src/jira_api.py` - REST API client (lines 58-116: get_issue_formatted)
-- `src/cli.py` - CLI interface (lines 36-120: analyze command)
-
-**Critical Framework:**
-- `skills/jira_analyzer.md` - **MOST CRITICAL** - defines analysis structure
-- `docs/ANALYSIS_GUIDELINES.md` - Detailed philosophy and examples
+- `src/analyzer.py` (lines 95-108: bot filtering, 138-170: auto-analyze)
+- `src/jira_api.py` (lines 58-116: get_issue_formatted)
+- `src/cli.py` (lines 36-120: analyze command)
 
 **Configuration:**
-- `.env` - Credentials (excluded from git)
-- `examples/sample_config.yaml` - Default settings + bot user list
+- `.env` - Credentials (never commit)
+- `examples/sample_config.yaml` - Bot user list
 
-## Pre-Submission Checklist
+**Analysis Rules:**
+- `skills/jira_analyzer.md` - **All analysis guidelines live here**
 
-- [ ] Maintains diagnostic (not prescriptive) approach
-- [ ] Uses REST API (no MCP references)
-- [ ] Preserves bot comment filtering
-- [ ] Tested with real Jira ticket
-- [ ] Updated relevant documentation
+## Pre-Commit Checklist
+
+- [ ] Tested with real Jira ticket (GOSDK-196630)
+- [ ] Bot filtering still works
+- [ ] No MCP references added
+- [ ] Documentation updated if needed
 - [ ] No credentials in code
 
-## Quick Wins
-
-**Fix a bug:** Check PROJECT_STATUS.md → Technical Quirks  
-**Add feature:** Follow existing patterns in src/analyzer.py  
-**Update docs:** Keep README, QUICKSTART, and EXAMPLE_OUTPUT in sync  
-**Test changes:** Use GOSDK-196630 (known ticket with attachments)
